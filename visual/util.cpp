@@ -110,3 +110,12 @@ bool between(int aNumber, int a, int b) {
 		return false;
 	}
 }
+
+float clipf(float val, float min, float max)
+{
+	if (val < min)
+		val = min;
+	if (val > max)
+		val = max;
+	return	val;
+}

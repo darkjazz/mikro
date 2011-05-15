@@ -37,7 +37,8 @@ public:
 	OSC(const char*, const char*, World*, GraphicsRenderer*);
 	~OSC();
 	
-	void sendMessage ();
+	void sendStates (float*, int);
+	void sendBMU(int x, int y, double state, vector<double>* values);	
 	void startListener();
 	void stopListener();
 	int getDone();
@@ -45,6 +46,9 @@ public:
 	float getBGGreen();
 	float getBGBlue();
 	float getAddParam();
+	float getTransX();
+	float getTransY();
+	float getTransZ();	
 	bool getWeightsChanged();
 	vector<double> getWeights();
 	void updateSettings();

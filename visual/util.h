@@ -41,5 +41,6 @@ int isEven(int);
 float xmodf(float, float);
 double xmodd(double, double);
 bool between(int, int, int);
+float clipf(float, float, float);
 
 #endif

@@ -13,7 +13,7 @@
 			d = DelayN.ar(sig, 0.1, del[3], amps[3]);
 			#w, x, y, z = A2B.ar(a, b, c, d);
 			Out.ar(out, AtkRotateXYZ.ar(w, x, y, z, xang, yang, zang) * amp)
-		}).add,
+		}),
 		
 		specs: (
 			amp: ControlSpec(0.3, 0.6),

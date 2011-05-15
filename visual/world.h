@@ -63,6 +63,7 @@ public:
 	int sizeX() { return _sizeX; };
 	int sizeY() { return _sizeY; };
 	double add() { return _add; };
+	double cellState(int, int);
 	
 	Node* findBMU(vector<double>);
 	Node* train(vector<double>);

@@ -37,4 +37,6 @@ void runApp (int, int, int, int, int, int, const char*, const char*, int, int, d
 
 void drawFrame(void);
 
+void collectStates(int, int);
+
 #endif

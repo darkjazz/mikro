@@ -14,7 +14,7 @@ SynthDef(\playPatch, {|out, buf, amp|
 )
 
 //~somBuffer = Buffer.read(s, "/Users/alo/Data/mikro/somData_110403_113759_TD10000NC8ND2SZ40.aif");
-~dur = 60;
+~dur = 90;
 //~analyzer = MikroAnalyzer(~dur, traindur: 5000, somBuffer: ~somBuffer);
 ~analyzer = MikroAnalyzer(~dur);
 

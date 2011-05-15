@@ -29,6 +29,7 @@ const char* port = "57120";
 float delta;
 bool isRunning = true;
 double learnRate = 0.1;
+float* avgStates;
 
 World* world;
 OSC* responder;
@@ -41,16 +42,25 @@ void drawFrame (void) {
 	
 	glLoadIdentity();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
+	
+	glTranslatef(responder->getTransX(), responder->getTransY() , responder->getTransZ());
 			
 	for (int x = 0; x < sizeX; x++) {
 		for (int y = 0; y < sizeY; y++) {
 			ogl->drawFragment( &world->nodes[x][y], x, y);
+			collectStates(x, y);
 		}
 	}
 	
 	glClearColor(responder->getBGRed(), responder->getBGGreen(), responder->getBGBlue(), 1.0);
 	
 	FsSwapBuffers();
+}
+
+void collectStates(int x, int y) {
+	int index; 
+	index = floor(x / 10.0) * 4.0 + floor(y / 10.0);
+	avgStates[index] += (float)world->cellState(x, y);
 }
 
 void runApp (int x, int y, int dbg, int w, int h, int f, const char* a, const char* p, int vs, int td, double lr) {
@@ -87,17 +97,27 @@ void runApp (int x, int y, int dbg, int w, int h, int f, const char* a, const ch
 	responder = new OSC(a, p, world, ogl);
 
 	responder->startListener();
+	
+	avgStates = new float[16];
 
 	while (isRunning) {
 		responder->updateSettings();
 		if (responder->getWeightsChanged()) {			
 			bmu = world->train(responder->getWeights());
+			responder->sendBMU(bmu->x, bmu->y, bmu->states[world->index()], &bmu->weights);
 			for (i = 0; i < 3; i++) {
 				world->nodes[bmu->x][bmu->y].states[i] = 1.0;
 			}
-			responder->updatePatterns();			
+			responder->updatePatterns();
+		}
+		for (i = 0; i < 16; i++) {
+			avgStates[i] = 0.0;
 		}
 		drawFrame();
+		for (i = 0; i < 16; i++) {
+			avgStates[i] /= 100.0;
+		}
+		responder->sendStates(avgStates, 16);
 		FsSleep(delta*1000);
 		if ((responder->getDone()) == 1) {
 			isRunning = false;
@@ -111,6 +131,8 @@ void runApp (int x, int y, int dbg, int w, int h, int f, const char* a, const ch
 	delete responder;
 	
 	delete ogl;
+	
+	delete [] avgStates;
 	
 }
 

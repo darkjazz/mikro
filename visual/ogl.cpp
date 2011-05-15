@@ -64,6 +64,21 @@ void GraphicsRenderer::drawFragment(Node *theNode, int x, int y) {
 	if (patternLib[3].active) {
 		pattern04(x, y);	
 	}
+	if (patternLib[4].active) {
+		pattern05(x, y);	
+	}
+	if (patternLib[5].active) {
+		pattern06(x, y);	
+	}
+	if (patternLib[6].active) {
+		pattern07(x, y);	
+	}
+	if (patternLib[7].active) {
+		pattern08(x, y);	
+	}
+	if (patternLib[8].active) {
+		pattern09(x, y);	
+	}
 	
 }
 
@@ -79,6 +94,7 @@ void GraphicsRenderer::pattern01(int x, int y) {
 	green = currentNode->weights[1] * state;
 	blue = currentNode->weights[2] * state;
 	alpha = currentNode->weights[3] * state;
+	alpha *= patternLib[0].alpha;
 	
 	strokeRect(0, 1.0);
 
@@ -93,6 +109,7 @@ void GraphicsRenderer::pattern02(int x, int y) {
 	for (i = 0; i < vectorSize; i++) {
 		red = green = blue = currentNode->weights[i]; 
 		alpha = currentNode->weights[i] * state;
+		alpha *= patternLib[1].alpha;
 		drawLine(xL, yB + (fragSizeY / vectorSize * i), zF, xL + fragSizeX, yB + (fragSizeY / vectorSize * i), zF, 1.0);
 	}
 	
@@ -102,6 +119,7 @@ void GraphicsRenderer::pattern02(int x, int y) {
 			yH = fragSizeY;
 			red = green = blue = 1.0;
 			alpha = 0.2;
+			alpha *= patternLib[1].alpha;
 			strokeRect(0, 1.0);
 		}
 	}
@@ -121,6 +139,7 @@ void GraphicsRenderer::pattern03(int x, int y) {
 	green = currentNode->weights[1] * state;
 	blue = currentNode->weights[2] * state;
 	alpha = currentNode->weights[3] * state;
+	alpha *= patternLib[2].alpha;
 
 	drawCircle(0, xW * yH , map(state, 6, 12), false);
 	
@@ -141,6 +160,7 @@ void GraphicsRenderer::pattern04(int x, int y) {
 		green = currentNode->weights[0] * (1.0-state);
 		blue = currentNode->weights[0] * (1.0-state);
 		alpha = map(currentNode->weights[1] * state, 0.4, 1.0);
+		alpha *= patternLib[3].alpha;
 		
 		strokeRect(0, 1.0);
 
@@ -155,6 +175,7 @@ void GraphicsRenderer::pattern04(int x, int y) {
 		green = currentNode->weights[2] * (1.0-state);
 		blue = currentNode->weights[2] * (1.0-state);
 		alpha = map(currentNode->weights[3] * state, 0.2, 0.6);
+		alpha *= patternLib[3].alpha;
 
 		fillRect(0);
 	}
@@ -171,6 +192,7 @@ void GraphicsRenderer::pattern04(int x, int y) {
 		green = currentNode->weights[4] * state;
 		blue = currentNode->weights[4] * state;
 		alpha = map(currentNode->weights[5] * (1.0 - state), 0.3, 0.8);
+		alpha *= patternLib[3].alpha;
 		
 		fillRect(0);
 
@@ -181,6 +203,150 @@ void GraphicsRenderer::pattern04(int x, int y) {
 		strokeRect(0, 2.0);
 		
 	}
+}
+
+void GraphicsRenderer::pattern05(int x, int y) {
+	
+//	int i;
+	float xx, yy;
+	
+	xx = fragSizeX * cos((state + (x + 1 / 40)) * (2 * pi));
+	yy = fragSizeY * sin((state + (y + 1 / 40)) * (2 * pi));
+	
+	xW = state * fragSizeX * 0.25f;
+	yH = state * fragSizeY * 0.25f;
+	
+	xL = x * fragSizeX + xx + xW;
+	yB = y * fragSizeY + yy + yH;
+	
+	red = currentNode->weights[7] * state;
+	green = currentNode->weights[6] * state;
+	blue = currentNode->weights[5] * state;
+	alpha = map(state, 0.5, 1.0);
+	alpha *= patternLib[4].alpha;
+	
+	drawPoint(xL, yB, 0.0, state * 2.0f);
+	
+}
+
+void GraphicsRenderer::pattern06(int x, int y) {
+
+	double radius, dist;
+
+	radius = 6.0;
+
+	if (ptrBMU)
+	{
+		
+		zF = zD = 0;
+				
+		red = currentNode->weights[0] * (1.0 - state);
+		green = currentNode->weights[1] * (1.0 - state);
+		blue = currentNode->weights[2] * (1.0 - state);
+		
+		dist = pow(ptrBMU->x - currentNode->x, 2) + pow(ptrBMU->y - currentNode->y, 2);		
+		
+		if (dist < pow(radius, 2)) {
+			xL = x * fragSizeX + fragSizeX - (fragSizeX * state);
+			yB = y * fragSizeY + (fragSizeY * 0.5);
+			xW = fragSizeX * state * 2.0;
+			yH = yB;
+									
+			alpha = map(exp(dist / (pow(radius, 2) * -2.0)), 0.2, 1.0);
+			alpha *= patternLib[5].alpha;
+			
+			drawLine(xL, yB, zF, xL + xW, yB, zF, map(state, 1.0, 2.0));			
+			
+		}
+		else 
+		{
+			yB = y * fragSizeY + fragSizeY - (fragSizeY * state);
+			xL = x * fragSizeX + (fragSizeX * 0.5);
+			yH = fragSizeY * state * 2.0;
+			xW = xL;
+
+			alpha = map(state, 0.0, 1.0);
+			alpha *= patternLib[5].alpha;			
+			drawLine(xL, yB, zF, xL, yB + yH, zF, 1.0);			
+		}
+			
+	}
+	
+}
+
+void GraphicsRenderer::pattern07(int x, int y) {
+	
+	int i;
+	float xx, yy;
+	
+	for (i = 0; i < vectorSize; i++) {
+	
+		xx = fragSizeX * cos( (state * currentNode->weights[i] ) * (2 * pi));
+		yy = fragSizeY * sin( (state * currentNode->weights[i] ) * (2 * pi));
+				
+		xL = x * fragSizeX + xx;
+		yB = y * fragSizeY + yy;
+		
+		red = currentNode->weights[i] * state;
+		green = currentNode->weights[i] * state;
+		blue = currentNode->weights[i] * state;
+		alpha = currentNode->weights[i] * state;
+		alpha *= patternLib[6].alpha;
+		
+		drawPoint(xL, yB, 0.0, 1.0);
+	}
+			
+}
+
+void GraphicsRenderer::pattern08(int x, int y) {
+	int i;
+	float ex, ey;
+
+	for (i = 0; i < vectorSize; i++)
+	{
+		xL = x * fragSizeX + (fragSizeX * 0.5) + (fragSizeX * 0.5 * cosf(state * (i / (float)vectorSize) * (2.0 * pi)));
+		yB = y * fragSizeY + (fragSizeY * 0.5) + (fragSizeY * 0.5 * sinf(state * (i / (float)vectorSize) * (2.0 * pi)));
+
+		ex = fragSizeX * cosf( (1.0 - state) * (i / (float)vectorSize) * (2.0 * pi));
+		ey = fragSizeY * sinf( (1.0 - state) * (i / (float)vectorSize) * (2.0 * pi));
+		red = currentNode->weights[i] * state;
+		green = currentNode->weights[wrapi(i+1,0,vectorSize-1)] * state;
+		blue = currentNode->weights[wrapi(i+2,0,vectorSize-1)] * state;
+		alpha = currentNode->weights[wrapi(i+3,0,vectorSize-1)] * state;
+		alpha *= patternLib[7].alpha;
+		
+		drawLine(xL, yB, 0, xL + ex, yB + ey, 0, 1.0);
+	}
+}
+
+void GraphicsRenderer::pattern09(int x, int y) {
+	
+	red = clipf(currentNode->weights[0], 0.0, 1.0);
+	green = clipf(currentNode->weights[1], 0.0, 1.0);
+	blue = clipf(currentNode->weights[2], 0.0, 1.0);
+	alpha = clipf(1.0 - currentNode->weights[3], 0.0, 1.0);
+	alpha *= patternLib[8].alpha;
+	
+	xL = x * fragSizeX;
+	yB = y * fragSizeY;
+	xW = fragSizeX;
+	yH = fragSizeY * 0.25;
+	
+	zF = zD = 0.0;
+	
+//	drawLine(xL, yB, zF, xL + xW, yB + yH, zD, 1.0);
+
+	strokeRect(0, 1.0);
+	
+	red = green = blue = clipf(currentNode->weights[5], 0.0, 1.0);
+	
+	xL = x * fragSizeX;
+	yB = y * fragSizeY + (fragSizeY * 0.5);
+
+//	drawLine(xL, yB, zF, xL + xW, yB + yH, zD, 1.0);
+	
+	strokeRect(0, 1.0);
+	
 }
 
 void GraphicsRenderer::fillRect (int plane) {

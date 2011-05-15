@@ -26,7 +26,7 @@
 #include <OpenGL/OpenGL.h>
 #include "world.h"
 
-const int numPatterns = 4;
+const int numPatterns = 9;
 
 struct pattern {
 
@@ -76,6 +76,16 @@ private:
 	void pattern03(int, int);
 
 	void pattern04(int, int);
+	
+	void pattern05(int, int);
+	
+	void pattern06(int, int);
+	
+	void pattern07(int, int);
+	
+	void pattern08(int, int);
+	
+	void pattern09(int, int);
 
 	// *** basic drawing functions *** //
 	

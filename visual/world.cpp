@@ -156,6 +156,8 @@ void World::setNeighborWeights(vector<double> newWeights) {
 
 void World::setAdd (double value) { _add = value; }
 
+double World::cellState(int x, int y) { return nodes[x][y].states[_index]; }
+
 Node* World::findBMU(vector<double> inputVector) {
 	int x, y;
 	double diff, best;

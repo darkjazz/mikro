@@ -16,7 +16,7 @@ Routine({
 	
 	1000.do({
 		var arr = Array.rand(8, 0.0, 1.0);
-		~mikro.visual.sendWeights(*arr);
+		m.sendWeights(*arr);
 		0.1.wait;
 	});
 	
@@ -38,6 +38,8 @@ m.sendMsg("settings", 0.95)
 m.bmu.x
 
 m.quit
+
+x = Array()
 
 r.sendMsg("/mikro/bg", 0.2, 0.5, 0.4)
 

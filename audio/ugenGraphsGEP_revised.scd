@@ -1,15 +1,10 @@
 ~ar = UGen.subclasses.select(_.respondsTo('ar'));
 
 ~ar = ~ar ++ ~ar.select({|class| class.subclasses.notNil }).collect({|class| class.subclasses }).flat;
-~ar.do(_.postln)
-
-~ar = [\SinOsc, \LFSaw, \VarSaw, \LFNoise0, \Dust2, \FreeVerb, \WhiteNoise, \DelayN].collect({|name| 
-	UGen.subclasses.select({|class| class.name == name }).first
-})
 
 ~chrs = Array.fill(20, {|i|
-	[~ar.choose.name] ++ Array.fill(23, {
-		[~ar.choose.name, "d", "f"].choose
+	[~ar.choose] ++ Array.fill(23, {
+		[~ar.choose, "d", "f"].choose
 	}) ++ Array.fill(8, { ["d", "f"].choose })
 });
 
@@ -17,7 +12,6 @@
 	chr.postln;
 	"  ".postln;
 });
-
 
 
 ~translate = {|ugen, chr, index, depth = 1|
@@ -56,9 +50,8 @@
 	argEnvir.postln;
 	index = index+args.size;
 	args.do({|item, i|
-		if (item.isKindOf(Symbol)) {
-			ugen = ~ar.select({|class| class.name == item }).first;
-			str = str ++ argNames[i].asString ++ ": " ++ ugen.name.asString ++ ".ar(" ++ ~translate.value(ugen, chr, index, depth + 1) ++ ")";
+		if (item.isKindOf(Class)) {
+			str = str ++ argNames[i].asString ++ ": " ++ ugen.name.asString ++ ".ar(" ++ ~translate.value(item, chr, index, depth + 1) ++ ")";
 		}
 		{
 			if (item == "d") {
@@ -76,12 +69,11 @@
 };
 
 ~codestrings = ~chrs.collect({|chr|
-	var str, class;
+	var str;
 	"----------------".postln;
 	str = "{";
 	str = str ++ chr[0].asString ++ ".ar(";
-	class = ~ar.select({|cls| cls.name == chr.first }).first;
-	str = str ++ ~translate.value(class, chr, 1);
+	str = str ++ ~translate.value(chr.first, chr, 1);
 	str = str ++ ")}"	
 });
 
@@ -92,9 +84,7 @@
 	".postln"
 })
 
+~result = ~codestrings[2].compile
+try {~result.asSynthDef} {|error| [\yo, error].postln }
 
-~codestrings.do({|str|
-	~result = str.compile;
-	try {~result.asSynthDef.add} {|error| [\yo, error].postln }
-});
 

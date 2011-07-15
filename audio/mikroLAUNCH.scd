@@ -5,7 +5,7 @@
 );
 
 ~nCoef = 8;
-~dur = 15 * 60;
+~dur = 1 * 60;
 
 ~graphics = MikroGraphics(
 	width: 800,
@@ -20,7 +20,7 @@
 );
 
 ~mikro = Mikro(
-	liveInput: true,
+	liveInput: false,
 	decoder: ~decoder,
 	graphics: ~graphics,
 	duration: ~dur,

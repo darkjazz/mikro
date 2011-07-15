@@ -79,6 +79,9 @@ void GraphicsRenderer::drawFragment(Node *theNode, int x, int y) {
 	if (patternLib[8].active) {
 		pattern09(x, y);	
 	}
+	if (patternLib[9].active) {
+		pattern10(x, y);	
+	}
 	
 }
 
@@ -347,6 +350,31 @@ void GraphicsRenderer::pattern09(int x, int y) {
 	
 	strokeRect(0, 1.0);
 	
+}
+
+void GraphicsRenderer::pattern10(int x, int y) {
+	int i, count;
+	float ex, ey, cx, cy;
+
+	red = state * clipf(currentNode->weights[0], 0.0, 1.0);
+	green = state * clipf(currentNode->weights[1], 0.0, 1.0);
+	blue = state * clipf(currentNode->weights[2], 0.0, 1.0);
+	
+	count = map(state, 6, 12);
+	
+	cx = x * fragSizeX + (fragSizeX * 0.5);
+	cy = y * fragSizeY + (fragSizeY * 0.5);
+	
+	for (i = 0; i < count; i++)
+	{
+		ex = cx + (fragSizeX * map(state, 0.5, 2.0) * cosf(state * (i / (float)count) * (2.0 * pi)));
+		ey = cy + (fragSizeY * map(state, 0.5, 2.0) * sinf(state * (i / (float)count) * (2.0 * pi)));
+		
+		alpha = state * clipf(currentNode->weights[4], 0.0, 1.0);
+		alpha *= patternLib[9].alpha;
+		
+		drawLine(cx, cy, 0, ex, ey, 0, 1.0);
+	}
 }
 
 void GraphicsRenderer::fillRect (int plane) {

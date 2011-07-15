@@ -1,11 +1,11 @@
-~ar = UGen.subclasses.select(_.respondsTo('ar'));
+//~ar = UGen.subclasses.select(_.respondsTo('ar'));
 
-~ar = ~ar ++ ~ar.select({|class| class.subclasses.notNil }).collect({|class| class.subclasses }).flat;
-~ar.do(_.postln)
-
+//~ar = ~ar ++ ~ar.select({|class| class.subclasses.notNil }).collect({|class| class.subclasses }).flat;
+//~ar.do(_.postln)
+(
 ~ar = [\SinOsc, \LFSaw, \VarSaw, \LFNoise0, \Dust2, \FreeVerb, \WhiteNoise, \DelayN].collect({|name| 
 	UGen.subclasses.select({|class| class.name == name }).first
-})
+});
 
 ~chrs = Array.fill(20, {|i|
 	[~ar.choose.name] ++ Array.fill(23, {
@@ -17,8 +17,6 @@
 	chr.postln;
 	"  ".postln;
 });
-
-
 
 ~translate = {|ugen, chr, index, depth = 1|
 	var args, argEnvir, argNames, str = "";
@@ -85,6 +83,7 @@
 	str = str ++ ")}"	
 });
 
+)
 
 ~codestrings.do({|str|
 	str.postln;

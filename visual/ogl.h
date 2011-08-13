@@ -24,9 +24,10 @@
 #define OGL_H
 
 #include <OpenGL/OpenGL.h>
+#include <GLUT/GLUT.h>
 #include "world.h"
 
-const int numPatterns = 10;
+const int numPatterns = 12;
 
 struct pattern {
 
@@ -53,7 +54,9 @@ public:
 	
 	// *** OpenGL global setup  *** //
 
-	void setupOgl (void);
+	void setupOgl();
+	
+	void reshape(double, double);
 
 	// *** draw cells *** //
 
@@ -68,6 +71,7 @@ private:
 	int currentIndex, vectorSize;
 	Node* currentNode;
 	Node* ptrBMU;
+	World* world;
 		
 	void pattern01(int, int);
 	
@@ -88,6 +92,10 @@ private:
 	void pattern09(int, int);
 
 	void pattern10(int, int);
+	
+	void pattern11(int, int);
+	
+	void pattern12(int, int);
 
 	// *** basic drawing functions *** //
 	

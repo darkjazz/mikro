@@ -25,9 +25,9 @@
 
 int done = 0;
 
-float bgRed = 0, bgGreen = 0, bgBlue = 0, addParam = 0.995, patAlpha;
+float bgRed = 0, bgGreen = 0, bgBlue = 0, addParam = 0.995, bgAlpha, patAlpha;
 float transx = 0, transy = 0, transz = 0;
-int patIndex, patActive;
+int patIndex, patActive, groupx = 10, groupy = 10, phase = 1, symmetry = 2;
 
 vector<double> weights;
 bool weightsChanged = false, patternChanged = false;
@@ -77,19 +77,22 @@ void OSC::sendBMU (int x, int y, double state, vector<double> * values)
 void OSC::startListener ()
 {
 	size = ptrWrld->vectorSize();
-	char* vec[size];
-	for (int i = 0; i < size; i++) {
-		vec[i] = "f";
+	char vec[size+1];
+	int i;
+	
+	for (i = 0; i < size; i++) {
+		vec[i] = 'f';
 	}
-		
+	vec[i] = '\0';
+	
 	thread = lo_server_thread_new("7770", error);
 	
 	lo_server_thread_add_method(thread, "/mikro/quit", "i", quit_handler, NULL);
-	lo_server_thread_add_method(thread, "/mikro/weights", "ffffffff", weights_handler, NULL);	
-	lo_server_thread_add_method(thread, "/mikro/settings", "fffffff", settings_handler, NULL);	
+	lo_server_thread_add_method(thread, "/mikro/weights", vec, weights_handler, NULL);	
+	lo_server_thread_add_method(thread, "/mikro/settings", "ffffffffiiii", settings_handler, NULL);	
 	lo_server_thread_add_method(thread, "/mikro/pattern", "iif", pattern_handler, NULL);	
 	lo_server_thread_start(thread);
-	
+		
 }
 
 void OSC::stopListener ()
@@ -113,11 +116,15 @@ int OSC::getDone () { return done; }
 float OSC::getBGRed() { return bgRed; }
 float OSC::getBGGreen() { return bgGreen; }
 float OSC::getBGBlue() { return bgBlue; }
+float OSC::getBGAlpha() { return bgAlpha; }
 float OSC::getAddParam() { return addParam; }
 float OSC::getTransX() { return transx; };
 float OSC::getTransY() { return transy; };
 float OSC::getTransZ() { return transz; };	
-
+int OSC::getGroupX() { return groupx; }
+int OSC::getGroupY() { return groupy; }
+int OSC::getPhase() { return phase; }
+int OSC::getSymmetry() { return symmetry; }
 bool OSC::getWeightsChanged() { return weightsChanged; }
 
 vector<double> OSC::getWeights() {  
@@ -152,9 +159,14 @@ int settings_handler(const char *path, const char *types, lo_arg **argv, int arg
 	bgRed = argv[1]->f;
 	bgGreen = argv[2]->f;
 	bgBlue = argv[3]->f;
-	transx = argv[4]->f;
-	transy = argv[5]->f;
-	transz = argv[6]->f;
+	bgAlpha = argv[4]->f;
+	transx = argv[5]->f;
+	transy = argv[6]->f;
+	transz = argv[7]->f;
+	groupx = argv[8]->i;
+	groupy = argv[9]->i;
+	phase = argv[10]->i;
+	symmetry = argv[11]->i;
 	return 0;
 }
 

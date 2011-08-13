@@ -52,11 +52,28 @@ void Node::nextState (double add, int index) {
 	sum = 0;
 	
 	for (i = 0; i < 8; i++) {
-		avg += (neighbors[i]->states[index] * weights[i]);
-		sum += weights[i];
+		avg += (neighbors[i]->states[index] * 1.0);
+		sum += 1.0;
 	}
 	
 	avg = avg / sum + add;
+	
+	this->states[wrapi(index + 1, 0, 2)] = wrapd(avg, 0.0, 1.0);
+	
+}
+
+
+void Node::nextState (double add, int index, bool x) {
+	int i;
+	double avg;
+	
+	avg = 0;
+	
+	for (i = 0; i < 8; i++) {
+		avg += neighbors[i]->states[index];
+	}
+	
+	avg = avg + add;
 	
 	this->states[wrapi(index + 1, 0, 2)] = wrapd(avg, 0.0, 1.0);
 	
@@ -123,7 +140,8 @@ void World::init (void) {
 			for (i = 0; i < 3; i++) {
 				for (j = 0; j < 3; j++) {
 					if (!(i == 1 && j == 1)) {
-						nodes[x][y].neighbors[nCount] = &(nodes[wrapi(x+(i-1), 0, _sizeX-1)][wrapi(y+(j-1), 0, _sizeY-1)]);
+//						nodes[x][y].neighbors[nCount] = &(nodes[wrapi(x+(i-1), 0, _sizeX-1)][wrapi(y+(j-1), 0, _sizeY-1)]);
+						nodes[x][y].neighbors[nCount] = &(nodes[fold(x+(i-1), 0, _sizeX-1)][fold(y+(j-1), 0, _sizeY-1)]);
 						nCount++;
 					}
 				}
@@ -178,42 +196,27 @@ Node* World::findBMU(vector<double> inputVector) {
 	return theNode;
 }
 
-Node* World::train (vector<double> inputVector) {
-	Node* bmu; 
-	Node* thisNode;
-	int x, y;
+void World::train (vector<double> inputVector, Node* thisNode, Node* bmu) { 
 	double tRadius, influence, dist;
 	
-	bmu = this->findBMU(inputVector);
-
-	for (x = 0; x < _sizeX; x++) {
-		for (y = 0; y < _sizeY; y++) {
-
-			thisNode = &nodes[x][y];
-
-			if (_trainCount < _trainDur) {
-				tRadius = _mapRadius * exp(_trainCount / (_timeConst*-1.0));
-				
-				dist = pow(bmu->x - thisNode->x, 2) + pow(bmu->y - thisNode->y, 2);
-				
-				if (dist < pow(tRadius, 2)) {
-					influence = exp(dist / (pow(tRadius, 2) * -2.0));
-					thisNode->update(inputVector, _learningRate, influence);
-				}
-				
-				_learningRate = _initLearningRate * exp(_trainCount / (_trainDur * -1.0));
-				
-			}
-			
-			thisNode->nextState(_add, _index);
-			
+	if (_trainCount < _trainDur) {
+		tRadius = _mapRadius * exp(_trainCount / (_timeConst*-1.0));
+		
+		dist = pow(bmu->x - thisNode->x, 2) + pow(bmu->y - thisNode->y, 2);
+		
+		if (dist < pow(tRadius, 2)) {
+			influence = exp(dist / (pow(tRadius, 2) * -2.0));
+			thisNode->update(inputVector, _learningRate, influence);
 		}
+		
+		_learningRate = _initLearningRate * exp(_trainCount / (_trainDur * -1.0));
+		
 	}
-	
-	if (_trainCount < _trainDur) { _trainCount++; }
-	
-	_index = wrapi(_index + 1, 0, 2);
-	
-	return bmu;
-	
+		
 }
+
+void World::incrementTrainCount() { if (_trainCount < _trainDur) { _trainCount++; } }
+
+void World::incrementIndex() { _index = wrapi(_index + 1, 0, 2); }
+
+int World::nextIndex() { return wrapi(_index + 1, 0, 2); }

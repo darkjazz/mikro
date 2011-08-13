@@ -1,4 +1,4 @@
-m = MikroVisual(800, 600, 40, 40, 30, NetAddr("127.0.0.1", 7770), 8, 5000, 0.1);
+m = MikroGraphics(800, 600, 40, 40, 30, NetAddr("127.0.0.1", 7770), 8, 5000, 0.1);
 
 m.putBmuFunction(\test, {|bmu|
 	bmu.postln
@@ -10,8 +10,9 @@ m.removeBmuFunction(\test)
 
 m.start
 
-m.sendPattern(3, 1, 1)
+m.sendPattern(9, 1, 0)
 
+(
 Routine({
 	
 	1000.do({
@@ -23,6 +24,10 @@ Routine({
 	"finished".postln
 	
 }).play
+)
+
+m.sendSetting(\add, 0.01)
+
 m.bmu.x
 m.sendWeights(*Array.rand(8, 0.0, 1.0))
 
@@ -33,7 +38,7 @@ r = OSCresponderNode(nil, '/mikro/bmu', {|ti, re, ms|
 
 r.remove
 
-m.sendMsg("settings", 0.95)
+m.sendMsg("settings", 0.05)
 
 m.bmu.x
 

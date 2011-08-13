@@ -31,12 +31,74 @@ bool isRunning = true;
 double learnRate = 0.1;
 float* avgStates;
 
+int grpSize = 10;
+
+bool flicker = false;
+
 World* world;
 OSC* responder;
 Node* bmu;
 GraphicsRenderer* ogl;
 
+void setCells() {
+	// symmetry flag: 0 - no symmetry, 1 - diagonal, 2 - square
+	
+	int i, xx, yy, hlfx, hlfy, sym;
+	
+	sym = responder->getSymmetry();
+	
+	for (i = 0; i < 3; i++) {
+		world->nodes[bmu->x][bmu->y].states[i] = 0.5;
+	}		
+
+	if (sym > 0)
+	{
+		hlfx = world->sizeX() / 2 - 1;
+		hlfy = world->sizeY() / 2 - 1;
+		
+		if (bmu->x > hlfx) 
+		{ 
+			xx = hlfx - wrapi(bmu->x, 0, hlfx); 
+		}
+		else
+		{	
+			xx = (world->sizeX() - 1) - bmu->x; 
+		}
+		
+		if (bmu->y > hlfy)
+		{	
+			yy = hlfy - wrapi(bmu->y, 0, hlfy); 
+		}
+		else
+		{	
+			yy = (world->sizeY() - 1) - bmu->y; 
+		}
+		
+		for (i = 0; i < 3; i++) {
+			world->nodes[xx][yy].states[i] = 0.5;
+		}				
+		
+		if (sym == 2) {
+			
+			for (i = 0; i < 3; i++) {
+				world->nodes[bmu->x][yy].states[i] = 0.5;
+			}				
+			
+			for (i = 0; i < 3; i++) {
+				world->nodes[xx][bmu->y].states[i] = 0.5;
+			}
+		}
+
+	}
+	
+}
+
 void drawFrame (void) {
+	Node* thisNode;
+	vector<double> weights;
+	bool weightsUpdated;
+	
+	responder->updateSettings();
 	
 	ogl->initFrame(world, bmu, width, height);
 	
@@ -44,28 +106,61 @@ void drawFrame (void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 	
 	glTranslatef(responder->getTransX(), responder->getTransY() , responder->getTransZ());
-			
+
+	weightsUpdated = responder->getWeightsChanged();
+
+	if (weightsUpdated) {
+		weights = responder->getWeights();
+		bmu = world->findBMU(weights);
+		setCells();
+		responder->sendBMU(bmu->x, bmu->y, bmu->states[world->index()], &bmu->weights);
+	}
+	
 	for (int x = 0; x < sizeX; x++) {
 		for (int y = 0; y < sizeY; y++) {
+			thisNode = &world->nodes[x][y];
+			if (weightsUpdated) {
+				world->train(weights, thisNode, bmu);
+			}
+			thisNode->nextState(world->add(), world->index());			
 			ogl->drawFragment( &world->nodes[x][y], x, y);
 			collectStates(x, y);
 		}
 	}
 	
-	glClearColor(responder->getBGRed(), responder->getBGGreen(), responder->getBGBlue(), 1.0);
+	responder->updatePatterns();	
+
+	world->incrementTrainCount();
+		
+	world->incrementIndex();
 	
+	/*
+	if (flicker)
+	{
+		glClearColor(responder->getBGRed(), responder->getBGGreen(), responder->getBGBlue(), responder->getBGAlpha());
+		flicker = false;
+	}
+	else
+	{
+		glClearColor(responder->getBGRed(), responder->getBGGreen(), responder->getBGBlue(), responder->getBGAlpha());
+		flicker = true;
+	}
+	*/
+	
+	glClearColor(responder->getBGRed(), responder->getBGGreen(), responder->getBGBlue(), responder->getBGAlpha());
+
 	FsSwapBuffers();
 }
 
 void collectStates(int x, int y) {
 	int index; 
-	index = floor(x / 10.0) * 4.0 + floor(y / 10.0);
+	index = floor(x / responder->getGroupX()) * (sizeX / responder->getGroupX()) + floor(y / responder->getGroupY());
 	avgStates[index] += (float)world->cellState(x, y);
 }
 
 void runApp (int x, int y, int dbg, int w, int h, int f, const char* a, const char* p, int vs, int td, double lr) {
 	
-	int i;
+	int i, stateSize;
 	
 	sizeX = x ?: sizeX; 
 	sizeY = y ?: sizeY; 
@@ -94,35 +189,44 @@ void runApp (int x, int y, int dbg, int w, int h, int f, const char* a, const ch
 	
 	ogl->setupOgl();
 	
+	ogl->reshape((double)width, (double)height);
+	
 	responder = new OSC(a, p, world, ogl);
 
 	responder->startListener();
-	
-	avgStates = new float[16];
+		
+	stateSize = (sizeX / responder->getGroupX()) * (sizeY / responder->getGroupY());
 
-	while (isRunning) {
-		responder->updateSettings();
-		if (responder->getWeightsChanged()) {			
-			bmu = world->train(responder->getWeights());
-			responder->sendBMU(bmu->x, bmu->y, bmu->states[world->index()], &bmu->weights);
-			for (i = 0; i < 3; i++) {
-				world->nodes[bmu->x][bmu->y].states[i] = 1.0;
-			}
-			responder->updatePatterns();
+	avgStates = new float[stateSize];
+	
+//	ogl->patternLib[2].active = true;
+//	ogl->patternLib[2].alpha = 1.0;
+
+	while (isRunning) {				
+
+		if ((sizeX / responder->getGroupX()) * (sizeY / responder->getGroupY()) != stateSize)
+		{
+			stateSize = (sizeX / responder->getGroupX()) * (sizeY / responder->getGroupY());
+			delete [] avgStates;
+			avgStates = new float[stateSize];		
 		}
-		for (i = 0; i < 16; i++) {
+		
+		for (i = 0; i < stateSize; i++) {
 			avgStates[i] = 0.0;
 		}
 		drawFrame();
-		for (i = 0; i < 16; i++) {
-			avgStates[i] /= 100.0;
+		for (i = 0; i < stateSize; i++) {
+			avgStates[i] /= (responder->getGroupX() * responder->getGroupY());
 		}
-		responder->sendStates(avgStates, 16);
+		responder->sendStates(avgStates, stateSize);
 		FsSleep(delta*1000);
 		if ((responder->getDone()) == 1) {
 			isRunning = false;
 		}
+				 		
 	}
+	
+	delete [] avgStates;
 	
 	delete world;
 	

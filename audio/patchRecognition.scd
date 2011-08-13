@@ -4,15 +4,15 @@
 	isUHJ: true
 );
 
-~nCoef = 8;
-~dur = 120;
+~nCoef = 12;
+~dur = 5*60;
 
 ~graphics = MikroGraphics(
 	width: 800,
 	height: 600,
-	sizeX: 40,
-	sizeY: 40,
-	frameRate: 30,
+	sizeX: 30,
+	sizeY: 30,
+	frameRate: 36,
 	remoteAddr: NetAddr("127.0.0.1", 7770),
 	vectorSize: ~nCoef,
 	trainDur: 5000,
@@ -27,13 +27,27 @@
 	nCoef: ~nCoef
 );
 
-~composer = MikroComposer(~mikro);
-
-~mikro.makeGui(~composer);
-
-~eq = MasterEQ(4);
+~recognizer = PatchRecognizer(~mikro, ~recognizer)
 
 )
+
+~mikro.initPerformance;
+
+~mikro.start(-80.dbamp, 0.05, 30);
+
+~recognizer.train
+
+~recognizer.weightDict.do({|patch| patch.hits.postln })
+
+~recognizer.weightDict.select({|patch| patch['weights'].sum == 0 }).size
+
+~mikro.analyzer.removeEventResponderFunction(\patchRec)
+
+~recognizer.save
+
+~recognizer.load("/Users/alo/Data/mikro/110802_112556.plib");
+
+~mikro.stop;
 
 ~mikro.graphics.quit
 

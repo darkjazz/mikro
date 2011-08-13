@@ -39,4 +39,6 @@ void drawFrame(void);
 
 void collectStates(int, int);
 
+void setCells(int);
+
 #endif

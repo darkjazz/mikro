@@ -43,7 +43,7 @@ public:
 	double difference (vector<double>);
 	void update (vector<double>, double, double);
 	void nextState (double, int);
-	
+	void nextState (double, int, bool);
 	
 };
 
@@ -66,7 +66,11 @@ public:
 	double cellState(int, int);
 	
 	Node* findBMU(vector<double>);
-	Node* train(vector<double>);
+	void train(vector<double>, Node*, Node*);
+
+	void incrementTrainCount();
+	void incrementIndex();
+	int nextIndex();
 
 private:
 	int _vectorSize, _sizeX, _sizeY, _trainDur, _trainCount, _index;

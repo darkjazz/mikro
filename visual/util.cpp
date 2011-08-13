@@ -119,3 +119,28 @@ float clipf(float val, float min, float max)
 		val = max;
 	return	val;
 }
+
+double roundd(double val, int places) {
+	return val;
+}
+
+int fold(int in, int lo, int hi) {
+	int x, c, range, range2;
+	x = in - lo;
+	
+	if (in >= hi) {
+		in = hi + hi - in;
+		if (in >= lo) return in;
+	} else if (in < lo) {
+		in = lo + lo - in;
+		if (in < hi) return in;
+	} else return in;
+	
+	if (hi == lo) return lo;
+	range = hi - lo;
+	range2 = range + range;
+	c = x - range2 * floor(x / range2);
+	if (c>=range) c = range2 - c;
+	return c + lo;
+	
+}

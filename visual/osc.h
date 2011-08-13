@@ -45,10 +45,15 @@ public:
 	float getBGRed();
 	float getBGGreen();
 	float getBGBlue();
+	float getBGAlpha();
 	float getAddParam();
 	float getTransX();
 	float getTransY();
 	float getTransZ();	
+	int getGroupX();
+	int getGroupY();
+	int getPhase();
+	int getSymmetry();
 	bool getWeightsChanged();
 	vector<double> getWeights();
 	void updateSettings();

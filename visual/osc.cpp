@@ -26,8 +26,8 @@
 int done = 0;
 
 float bgRed = 0, bgGreen = 0, bgBlue = 0, addParam = 0.995, bgAlpha, patAlpha;
-float transx = 0, transy = 0, transz = 0;
-int patIndex, patActive, groupx = 10, groupy = 10, phase = 1, symmetry = 2;
+float transx = -40, transy = -30, transz = 40;
+int patIndex, patActive, groupx = 5, groupy = 5, phase = 1, symmetry = 2;
 
 vector<double> weights;
 bool weightsChanged = false, patternChanged = false;

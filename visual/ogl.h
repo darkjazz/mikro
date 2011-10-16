@@ -27,7 +27,7 @@
 #include <GLUT/GLUT.h>
 #include "world.h"
 
-const int numPatterns = 12;
+const int numPatterns = 16;
 
 struct pattern {
 
@@ -42,12 +42,20 @@ struct pattern {
 class GraphicsRenderer {
 
 public:
-	GraphicsRenderer() {
+	GraphicsRenderer(World* _world, int winWidth, int winHeight) {
 		patternLib = new pattern[numPatterns];
+		world = _world;
+		fragSizeX = (double)(winWidth / world->sizeX()) * 0.1;
+		fragSizeY = (double)(winHeight / world->sizeY()) * 0.1;//0.04;
+		vectorSize = world->vectorSize();
+		currentIndex = world->index();		
 	};
 	
 	~GraphicsRenderer() {
 		delete [] patternLib;
+		delete [] rowColors;
+		delete [] rowNormals;
+		delete [] rowVertices;		
 	};
 	
 	pattern* patternLib;	
@@ -57,13 +65,17 @@ public:
 	void setupOgl();
 	
 	void reshape(double, double);
+	
+	void prepareFrame();
 
 	// *** draw cells *** //
 
-	void initFrame(World*, Node*, int, int);
-
-	void drawFragment(Node*, int, int);
-
+	void drawFragment(Node*, Node*, int, int);
+	
+	void drawRow();
+	
+	void drawWorld();
+		
 private:
 	
 	double fragSizeX, fragSizeY, state;
@@ -72,7 +84,13 @@ private:
 	Node* currentNode;
 	Node* ptrBMU;
 	World* world;
-		
+	
+	GLfloat *rowVertices, *worldVertices, *rowNormals, *worldNormals, *rowColors, *worldColors;
+	
+	bool _drawRow, _drawWorld;
+
+	void pattern00(int, int);
+
 	void pattern01(int, int);
 	
 	void pattern02(int, int);
@@ -96,6 +114,12 @@ private:
 	void pattern11(int, int);
 	
 	void pattern12(int, int);
+	
+	void pattern13(int, int);
+	
+	void pattern14(int, int);
+
+	void pattern15(int, int);
 
 	// *** basic drawing functions *** //
 	
@@ -108,6 +132,8 @@ private:
 	void drawLine (float, float, float, float, float, float, float);
 	
 	void drawCircle (int, float, int, bool);
+	
+	void strokeRectArray();
 	
 };
 

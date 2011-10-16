@@ -38,7 +38,6 @@
 
 ~patchRecognizer.weightDict
 
-
 ~mikro.initPerformance;
 
 (

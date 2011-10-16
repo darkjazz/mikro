@@ -40,6 +40,8 @@ OSC* responder;
 Node* bmu;
 GraphicsRenderer* ogl;
 
+enum cellSymmetry { NONE, DIAGONAL, FULL };
+
 void setCells() {
 	// symmetry flag: 0 - no symmetry, 1 - diagonal, 2 - square
 	
@@ -51,7 +53,7 @@ void setCells() {
 		world->nodes[bmu->x][bmu->y].states[i] = 0.5;
 	}		
 
-	if (sym > 0)
+	if (sym > NONE)
 	{
 		hlfx = world->sizeX() / 2 - 1;
 		hlfy = world->sizeY() / 2 - 1;
@@ -78,7 +80,7 @@ void setCells() {
 			world->nodes[xx][yy].states[i] = 0.5;
 		}				
 		
-		if (sym == 2) {
+		if (sym == FULL) {
 			
 			for (i = 0; i < 3; i++) {
 				world->nodes[bmu->x][yy].states[i] = 0.5;
@@ -99,9 +101,7 @@ void drawFrame (void) {
 	bool weightsUpdated;
 	
 	responder->updateSettings();
-	
-	ogl->initFrame(world, bmu, width, height);
-	
+		
 	glLoadIdentity();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 	
@@ -116,6 +116,8 @@ void drawFrame (void) {
 		responder->sendBMU(bmu->x, bmu->y, bmu->states[world->index()], &bmu->weights);
 	}
 	
+	ogl->prepareFrame();
+		
 	for (int x = 0; x < sizeX; x++) {
 		for (int y = 0; y < sizeY; y++) {
 			thisNode = &world->nodes[x][y];
@@ -123,10 +125,13 @@ void drawFrame (void) {
 				world->train(weights, thisNode, bmu);
 			}
 			thisNode->nextState(world->add(), world->index());			
-			ogl->drawFragment( &world->nodes[x][y], x, y);
+			ogl->drawFragment( &world->nodes[x][y], bmu, x, y);
 			collectStates(x, y);
 		}
+		ogl->drawRow();
 	}
+	
+	ogl->drawWorld();
 	
 	responder->updatePatterns();	
 
@@ -185,7 +190,7 @@ void runApp (int x, int y, int dbg, int w, int h, int f, const char* a, const ch
 	
 	world = new World(sizeX, sizeY, vecSize, trainDur, learnRate);
 
-	ogl = new GraphicsRenderer();
+	ogl = new GraphicsRenderer(world, width, height);
 	
 	ogl->setupOgl();
 	
@@ -199,8 +204,8 @@ void runApp (int x, int y, int dbg, int w, int h, int f, const char* a, const ch
 
 	avgStates = new float[stateSize];
 	
-//	ogl->patternLib[2].active = true;
-//	ogl->patternLib[2].alpha = 1.0;
+//	ogl->patternLib[12].active = true;
+//	ogl->patternLib[12].alpha = 1.0;
 
 	while (isRunning) {				
 
@@ -225,9 +230,7 @@ void runApp (int x, int y, int dbg, int w, int h, int f, const char* a, const ch
 		}
 				 		
 	}
-	
-	delete [] avgStates;
-	
+		
 	delete world;
 	
 	responder->stopListener();

@@ -25,7 +25,8 @@
 
 const double pi = 3.1415926535;
 
-void GraphicsRenderer::setupOgl (void) {
+void GraphicsRenderer::setupOgl () {
+	
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClearDepth(1.0f);
 	glDepthFunc(GL_LEQUAL);
@@ -52,60 +53,127 @@ void GraphicsRenderer::reshape(double width, double height) {
     glLoadIdentity();
 }
 
-void GraphicsRenderer::initFrame(World * ptrWorld, Node * argBMU, int winWidth, int winHeight) {
-	fragSizeX = (double)(winWidth / ptrWorld->sizeX()) * 0.1;
-	fragSizeY = (double)(winHeight / ptrWorld->sizeY()) * 0.1;//0.04;
-	vectorSize = ptrWorld->vectorSize();
-	ptrBMU = argBMU;
-	currentIndex = ptrWorld->index();
-	world = ptrWorld;
+void GraphicsRenderer::prepareFrame() {
+	
+	if (patternLib[12].active)
+	{
+		_drawRow = true;
+		delete [] rowColors;
+		delete [] rowNormals;
+		delete [] rowVertices;
+		
+		rowVertices = new GLfloat[world->sizeY()*3];
+		rowNormals = new GLfloat[world->sizeY()*3];
+		rowColors = new GLfloat[world->sizeY()*4];
+	}
+	
+//	if (patternLib[13].active)
+//	{
+//		_drawWorld = true;
+//		delete [] worldColors;
+//		delete [] worldNormals;
+//		delete [] worldVertices;
+//		
+//		worldVertices = new GLfloat[world->sizeX() * world->sizeY() * 3];
+//		worldNormals = new GLfloat[world->sizeX() * world->sizeY() * 3];
+//		worldColors = new GLfloat[world->sizeX() * world->sizeY() * 4];
+//	}
+	
 }
 
-void GraphicsRenderer::drawFragment(Node *theNode, int x, int y) {
+void GraphicsRenderer::drawFragment(Node *theNode, Node* _bmu, int x, int y) {
 	
 	currentNode = theNode;
+	ptrBMU = _bmu;
 	
 	state = currentNode->states[currentIndex];
 	if (patternLib[0].active) {
-		pattern01(x, y);
+		pattern00(x, y);
 	}
 	if (patternLib[1].active) {
-		pattern02(x, y);	
+		pattern01(x, y);	
 	}
 	if (patternLib[2].active) {
-		pattern03(x, y);	
+		pattern02(x, y);	
 	}
 	if (patternLib[3].active) {
-		pattern04(x, y);	
+		pattern03(x, y);	
 	}
 	if (patternLib[4].active) {
-		pattern05(x, y);	
+		pattern04(x, y);	
 	}
 	if (patternLib[5].active) {
-		pattern06(x, y);	
+		pattern05(x, y);	
 	}
 	if (patternLib[6].active) {
-		pattern07(x, y);	
+		pattern06(x, y);	
 	}
 	if (patternLib[7].active) {
-		pattern08(x, y);	
+		pattern07(x, y);	
 	}
 	if (patternLib[8].active) {
-		pattern09(x, y);	
+		pattern08(x, y);	
 	}
 	if (patternLib[9].active) {
-		pattern10(x, y);	
+		pattern09(x, y);	
 	}
 	if (patternLib[10].active) {
-		pattern11(x, y);	
+		pattern10(x, y);	
 	}
 	if (patternLib[11].active) {
+		pattern11(x, y);	
+	}
+	if (patternLib[12].active) {
 		pattern12(x, y);	
+	}
+	if (patternLib[13].active) {
+		pattern13(x, y);	
+	}
+	if (patternLib[14].active) {
+		pattern14(x, y);	
+	}
+	if (patternLib[15].active) {
+		pattern15(x, y);	
+	}
+}
+
+void GraphicsRenderer::drawRow() {
+	
+	if (_drawRow)
+	{
+	
+		glEnableClientState(GL_NORMAL_ARRAY);
+		glEnableClientState(GL_COLOR_ARRAY);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		
+		glNormalPointer(GL_FLOAT, 0, rowNormals);
+		glColorPointer(4, GL_FLOAT, 0, rowColors);
+		glVertexPointer(3, GL_FLOAT, 0, rowVertices);
+
+		glEnable(GL_LINE_SMOOTH);
+		
+		glDrawArrays(GL_LINES, 0, world->sizeY());
+		
+		glDisable(GL_LINE_SMOOTH);
+		
+	//	glEnable(GL_POLYGON_SMOOTH);
+	//	
+	//	glDrawArrays(GL_POLYGON, 0, world->sizeY());
+	//	
+	//	glDisable(GL_POLYGON_SMOOTH);
+		
+		glDisableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_COLOR_ARRAY);
+		glDisableClientState(GL_NORMAL_ARRAY);
 	}
 	
 }
 
-void GraphicsRenderer::pattern01(int x, int y) {
+void GraphicsRenderer::drawWorld() {
+
+}
+
+void GraphicsRenderer::pattern00(int x, int y) {
 	xL = x * fragSizeX + fragSizeX - (fragSizeX * 2.0 * state);
 	yB = y * fragSizeY + fragSizeY - (fragSizeY * 2.0 * state);
 	zF = zD = -100.0;
@@ -119,11 +187,12 @@ void GraphicsRenderer::pattern01(int x, int y) {
 	alpha = state;
 	alpha *= patternLib[0].alpha;
 	
-	strokeRect(0, 1.0);
+//	strokeRect(0, 1.0);
+	strokeRectArray();
 		
 }
 
-void GraphicsRenderer::pattern02(int x, int y) {
+void GraphicsRenderer::pattern01(int x, int y) {
 	int i;
 	xL = fragSizeX * x;
 	yB = fragSizeY * y;
@@ -149,7 +218,7 @@ void GraphicsRenderer::pattern02(int x, int y) {
 	
 }
 
-void GraphicsRenderer::pattern03(int x, int y) {
+void GraphicsRenderer::pattern02(int x, int y) {
 	
 	float eState;
 	
@@ -196,7 +265,7 @@ void GraphicsRenderer::pattern03(int x, int y) {
 		
 }
 
-void GraphicsRenderer::pattern04(int x, int y) {
+void GraphicsRenderer::pattern03(int x, int y) {
 	
 //	if (between(y, 2, 5) || between(y, 10, 13) || between(y, 18, 21) || between(y, 26, 29) || between(y, 34, 37) ) {
 
@@ -261,7 +330,7 @@ void GraphicsRenderer::pattern04(int x, int y) {
 	}
 }
 
-void GraphicsRenderer::pattern05(int x, int y) {
+void GraphicsRenderer::pattern04(int x, int y) {
 	
 //	int i;
 	float xx, yy;
@@ -285,7 +354,7 @@ void GraphicsRenderer::pattern05(int x, int y) {
 	
 }
 
-void GraphicsRenderer::pattern06(int x, int y) {
+void GraphicsRenderer::pattern05(int x, int y) {
 
 	double radius, dist;
 
@@ -330,7 +399,7 @@ void GraphicsRenderer::pattern06(int x, int y) {
 	
 }
 
-void GraphicsRenderer::pattern07(int x, int y) {
+void GraphicsRenderer::pattern06(int x, int y) {
 	
 	int i;
 	float xx, yy;
@@ -354,7 +423,7 @@ void GraphicsRenderer::pattern07(int x, int y) {
 			
 }
 
-void GraphicsRenderer::pattern08(int x, int y) {
+void GraphicsRenderer::pattern07(int x, int y) {
 	int i;
 	float ex, ey;
 
@@ -375,7 +444,7 @@ void GraphicsRenderer::pattern08(int x, int y) {
 	}
 }
 
-void GraphicsRenderer::pattern09(int x, int y) {
+void GraphicsRenderer::pattern08(int x, int y) {
 	
 	red = clipf(currentNode->weights[0], 0.0, 1.0);
 	green = clipf(currentNode->weights[1], 0.0, 1.0);
@@ -405,7 +474,7 @@ void GraphicsRenderer::pattern09(int x, int y) {
 	
 }
 
-void GraphicsRenderer::pattern10(int x, int y) {
+void GraphicsRenderer::pattern09(int x, int y) {
 	int i, count;
 	float ex, ey, cx, cy;
 
@@ -432,7 +501,7 @@ void GraphicsRenderer::pattern10(int x, int y) {
 	}
 }
 
-void GraphicsRenderer::pattern11(int x, int y) {
+void GraphicsRenderer::pattern10(int x, int y) {
 	double rounded;
 	
 	rounded = round(state * 10) / 10.0;	
@@ -453,7 +522,7 @@ void GraphicsRenderer::pattern11(int x, int y) {
 	
 }
 
-void GraphicsRenderer::pattern12(int x, int y) {
+void GraphicsRenderer::pattern11(int x, int y) {
 	double fsizey = (fragSizeY * 0.4) + 10.0;
 	
 	xL = x * fragSizeX + fragSizeX - (fragSizeX * 2.5 * state);
@@ -473,6 +542,163 @@ void GraphicsRenderer::pattern12(int x, int y) {
 	
 }
 
+void GraphicsRenderer::pattern12(int x, int y) {
+
+	int indexv, indexc;
+	float xx, yy;
+
+	xx = fragSizeX * cos((state + (x + 1 / 40)) * (2 * pi));
+	yy = fragSizeY * sin((state + (y + 1 / 40)) * (2 * pi));
+	
+	xW = state * fragSizeX * 0.25f;
+	yH = state * fragSizeY * 0.25f;
+	
+	xL = x * fragSizeX + xx + xW;
+	yB = y * fragSizeY + yy + yH;
+	
+	red = state * currentNode->weights[0];
+	green = state * currentNode->weights[1];
+	blue = state * currentNode->weights[2];
+	alpha = state;
+	alpha *= patternLib[12].alpha;
+		
+	indexv = y * 3;
+	indexc = y * 4;
+	
+	rowVertices[indexv] = xL;
+	rowVertices[indexv + 1] = yB;
+	rowVertices[indexv + 2] = -100.0 * map(state, 0.8, 1.2);
+	
+	rowNormals[indexv] = 0;
+	rowNormals[indexv + 1] = 0;
+	rowNormals[indexv + 2] = 1;
+	
+	rowColors[indexc] = red;
+	rowColors[indexc + 1] = green;
+	rowColors[indexc + 2] = blue;
+	rowColors[indexc + 3] = alpha;
+	
+}
+
+void GraphicsRenderer::pattern13(int x, int y) {
+	int segs;
+
+	xL = x * fragSizeX + fragSizeX - (fragSizeX * state);
+	yB = y * fragSizeY + fragSizeY - (fragSizeY * state);
+	zF = zD = -100.0;
+	
+	xW = fragSizeX * state * 2.0;
+	yH = fragSizeY * state * 2.0;
+	
+	red = clipf(currentNode->weights[0], 0.0, 1.0) * state;
+	green = clipf(currentNode->weights[1], 0.0, 1.0) * state;
+	blue = clipf(currentNode->weights[2], 0.0, 1.0) * state;
+	alpha = state;
+	alpha *= patternLib[13].alpha;
+	
+	segs = map(state, 4, 32);
+	
+	drawCircle(0, xW, (int)segs, false);
+		
+}
+
+void GraphicsRenderer::pattern14(int x, int y) {
+	int segs, i;
+	float avg;
+	
+	xL = x * fragSizeX + fragSizeX - (fragSizeX * 0.5 * state);
+	yB = y * fragSizeY + fragSizeY - (fragSizeY * 0.5 * state);
+	zF = zD = -100.0;
+	
+	avg = 0.0;
+	for (i = 0; i < vectorSize; i++)
+	{
+		avg += currentNode->weights[i];
+	}
+	
+	avg = avg / vectorSize;
+	
+	xW = fragSizeX * state * avg;
+	yH = fragSizeY * state;
+	
+	red = clipf(currentNode->weights[7], 0.0, 1.0) * state;
+	green = clipf(currentNode->weights[6], 0.0, 1.0) * state;
+	blue = clipf(currentNode->weights[5], 0.0, 1.0) * state;
+	alpha = state;
+	alpha *= patternLib[14].alpha;
+	
+	segs = 12;
+	
+	drawCircle(0, xW, (int)segs, true);
+	drawCircle(0, xW, (int)segs, false);
+	
+}
+
+void GraphicsRenderer::pattern15(int x, int y) {
+	xL = x * fragSizeX;
+	yB = y * fragSizeY;
+	zF = zD = -100.0;
+	
+	xW = fragSizeX * state;
+	yH = fragSizeY * state;
+	
+	red = clipf(currentNode->weights[0], 0.0, 1.0) * state;
+	green = clipf(currentNode->weights[1], 0.0, 1.0) * state;
+	blue = clipf(currentNode->weights[2], 0.0, 1.0) * state;
+	alpha = state;
+	alpha *= patternLib[15].alpha;
+	
+	if (state > 0.75) {
+		drawLine(xL, yB + (fragSizeY * 0.5), zF, xL + xW, yB + (fragSizeY * 0.5), zD, state * 3.0);
+	}
+	else
+	{
+		drawLine(xL + (fragSizeX * 0.5), yB, zF, xL + (fragSizeX * 0.5), yB + yH, zD, state * 3.0);	
+	}
+}
+
+void GraphicsRenderer::strokeRectArray() {
+	
+	GLfloat vertices[] = {
+		xL, yB, zF,				xL + xW, yB, zF,
+		xL + xW, yB, zF,		xL + xW, yB + yH, zF,
+		xL + xW, yB + yH, zF,	xL, yB + yH, zF,
+		xL, yB + yH, zF,		xL, yB, zF
+	};
+	
+	GLfloat normals[] = {
+		0, 0, 1,				0, 0, 1,
+		0, 0, 1,				0, 0, 1,
+		0, 0, 1,				0, 0, 1,
+		0, 0, 1,				0, 0, 1
+	};
+	
+	GLfloat colors[] = {
+		red, green, blue, alpha,	red, green, blue, alpha,
+		red, green, blue, alpha,	red, green, blue, alpha,
+		red, green, blue, alpha,	red, green, blue, alpha,
+		red, green, blue, alpha,	red, green, blue, alpha
+	};
+	
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	
+	glNormalPointer(GL_FLOAT, 0, normals);
+	glColorPointer(4, GL_FLOAT, 0, colors);
+	glVertexPointer(3, GL_FLOAT, 0, vertices);
+	
+	glEnable(GL_LINE_SMOOTH);
+	
+	glDrawArrays(GL_LINES, 0, 8);
+	
+	glDisable(GL_LINE_SMOOTH);
+		
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	
+}
 
 void GraphicsRenderer::fillRect (int plane) {
 	glColor4f(red, green, blue, alpha);

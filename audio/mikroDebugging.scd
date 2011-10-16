@@ -26,7 +26,15 @@ Routine({
 }).play
 )
 
-m.sendSetting(\add, 0.01)
+m.settings[\groupx] = 5;
+m.settings[\groupy] = 5;
+m.settings[\transz] = 30;
+m.settings[\transx] = -40;
+m.settings[\transy] = -30;
+
+m.sendSetting(\add, 0.005)
+
+m.sendSetting(\transz, 20)
 
 m.bmu.x
 m.sendWeights(*Array.rand(8, 0.0, 1.0))
@@ -57,6 +65,8 @@ r.sendMsg("/mikro/weights", *a);
 
 Fx3D
 
+
+(
 Routine({
 	
 	1000.do({
@@ -70,3 +80,4 @@ Routine({
 }).play
 
 
+)

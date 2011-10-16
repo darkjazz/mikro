@@ -2,7 +2,7 @@
 
 ~ar = ~ar ++ ~ar.select({|class| class.subclasses.notNil }).collect({|class| class.subclasses }).flat;
 
-~chrs = Array.fill(20, {|i|
+~chrs = Array.fill(100, {|i|
 	[~ar.choose] ++ Array.fill(23, {
 		[~ar.choose, "d", "f"].choose
 	}) ++ Array.fill(8, { ["d", "f"].choose })
@@ -14,6 +14,7 @@
 });
 
 
+(
 ~translate = {|ugen, chr, index, depth = 1|
 	var args, argEnvir, argNames, str = "";
 	("UGEN: " ++ ugen).postln;
@@ -67,6 +68,7 @@
 	});
 	str
 };
+)
 
 ~codestrings = ~chrs.collect({|chr|
 	var str;
@@ -84,7 +86,12 @@
 	".postln"
 })
 
-~result = ~codestrings[2].compile
-try {~result.asSynthDef} {|error| [\yo, error].postln }
+~codestrings[0].postln
 
+~codestrings.do({|str, i|
+	
+	~result = str.compile;
+	try {~result.asSynthDef; Post << i << " SUCCESSFULLY COMPILED!!!!!!!!" << Char.nl;} 
+	{|error| Post << i << " FAILED!!!!!" << Char.nl; }
+})
 

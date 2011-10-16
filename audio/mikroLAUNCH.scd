@@ -5,7 +5,7 @@
 );
 
 ~nCoef = 12;
-~dur = 10 * 60;
+~dur = 130;
 
 ~bpm = 135;
 ~beatdur = (~bpm / 60).reciprocal;
@@ -16,7 +16,7 @@
 	height: 600,
 	sizeX: 40,
 	sizeY: 40,
-	frameRate: 18,
+	frameRate: 36,
 	remoteAddr: NetAddr("127.0.0.1", 7770),
 	vectorSize: ~nCoef,
 	trainDur: 5000,
@@ -33,15 +33,15 @@
 
 ~analyzer = ~mikro.analyzer;
 
-~composer = MikroComposer(~mikro);
+~procs = "/Users/alo/Development/mikro/audio/procs.scd".load;
+
+~composer = MikroComposer(~mikro, ~procs);
 
 ~eq = MasterEQ(4);
 
 ~recognizer = PatchRecognizer(~mikro).load("/Users/alo/Data/mikro/110802_112556.plib");
 
-~procs = "/Users/alo/Development/mikro/audio/procs.scd".load;
-
-~mikro.makeGui(~composer, ~recognizer, ~procs);
+~mikro.makeGui(~composer, ~recognizer);
 
 )
 
@@ -49,11 +49,13 @@
 
 ~mikro.graphics.quit
 
-~mikro.analyzer.events.size
-
 ~graphics.states
 
+~mikro.analyzer.visualize
 
+~mikro.analyzer.elapsedTime
+
+~mikro.analyzer.events.size
 
 
 (

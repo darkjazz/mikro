@@ -26,7 +26,7 @@
 int sizeX=40, sizeY=40, debugMode=1, width=800, height=600, frameRate=30, vecSize=8, trainDur=1000;
 const char* host = "127.0.0.1";
 const char* port = "57120";
-float delta;
+double delta;
 bool isRunning = true;
 double learnRate = 0.1;
 float* avgStates;
@@ -186,7 +186,7 @@ void runApp (int x, int y, int dbg, int w, int h, int f, const char* a, const ch
 	else
 		FsOpenWindow(SCREENWIDTH, 0, width, height, 1);
 		
-	delta = 1.0/frameRate;
+	delta = 1.0/(double)frameRate;
 	
 	world = new World(sizeX, sizeY, vecSize, trainDur, learnRate);
 
@@ -224,10 +224,11 @@ void runApp (int x, int y, int dbg, int w, int h, int f, const char* a, const ch
 			avgStates[i] /= (responder->getGroupX() * responder->getGroupY());
 		}
 		responder->sendStates(avgStates, stateSize);
-		FsSleep(delta*1000);
 		if ((responder->getDone()) == 1) {
 			isRunning = false;
 		}
+
+		FsSleep(delta);
 				 		
 	}
 		

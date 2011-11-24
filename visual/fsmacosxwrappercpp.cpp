@@ -8,7 +8,7 @@
 extern "C" void FsOpenWindowC(int x0,int y0,int wid,int hei,int useDoubleBuffer);
 extern "C" void FsGetWindowSizeC(int *wid,int *hei);
 extern "C" void FsPollDeviceC(void);
-extern "C" void FsSleepC(int ms);
+extern "C" void FsSleepC(double s);
 extern "C" int FsPassedTimeC(void);
 extern "C" void FsMouseC(int *lb,int *mb,int *rb,int *mx,int *my);
 extern "C" int FsGetMouseEventC(int *lb,int *mb,int *rb,int *mx,int *my);
@@ -34,9 +34,9 @@ void FsPollDevice(void)
 	FsPollDeviceC();
 }
 
-void FsSleep(int ms)
+void FsSleep(double s)
 {
-	FsSleepC(ms);
+	FsSleepC(s);
 }
 
 int FsPassedTime(void)

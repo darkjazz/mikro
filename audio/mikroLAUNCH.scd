@@ -4,12 +4,29 @@
 	isUHJ: true
 );
 
+//// LIVE INPUT
+//~input = MikroInput(~decoder);
+
+//// SATOSHI SAMPLES
+~input = MikroInput(~decoder, "/Users/alo/sounds/eclambone_samples/*");
+
+//// CHRISTIAN
+//~input = MikroInput(~decoder, "/Users/alo/sounds/christian/monoclipmx.aif");
+
 ~nCoef = 12;
 ~dur = 130;
+~isMono = true;
 
 ~bpm = 135;
 ~beatdur = (~bpm / 60).reciprocal;
 ~round = ~beatdur / 8;
+
+~analyzer = MikroAnalyzer(
+	maxdur: ~dur, 
+	numcoef: ~nCoef, 
+	recordInput: true, 
+	isMono: ~isMono
+);
 
 ~graphics = MikroGraphics(
 	width: 800,
@@ -24,14 +41,10 @@
 );
 
 ~mikro = Mikro(
-	liveInput: false,
-	decoder: ~decoder,
+	input: ~input,
 	graphics: ~graphics,
-	duration: ~dur,
-	nCoef: ~nCoef
+	analyzer: ~analyzer
 );
-
-~analyzer = ~mikro.analyzer;
 
 ~procs = "/Users/alo/Development/mikro/audio/procs.scd".load;
 

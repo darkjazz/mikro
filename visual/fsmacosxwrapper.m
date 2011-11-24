@@ -1120,13 +1120,11 @@ void FsPollDeviceC(void)
 	[pool release];	
 }
 
-void FsSleepC(int ms)
+void FsSleepC(double s)
 {
-	if(ms>0)
+	if(s>0)
 	{
-		double sec;
-		sec=(double)ms/1000.0;
-		[NSThread sleepForTimeInterval:sec];
+		[NSThread sleepForTimeInterval:s];
 	}
 }
 

@@ -50,7 +50,6 @@ a.events.do({|ev|
 })
 
 
-
 ~intervals = Pseq(a.selectIntervals(0.05, 3).round((140/60).reciprocal), 1).asStream;
 {
 a.events.do({|ev|

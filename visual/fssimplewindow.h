@@ -160,7 +160,7 @@ FSKEY_NUM_KEYCODE
 void FsOpenWindow(int x0,int y0,int wid,int hei,int useDoubleBuffer);
 void FsGetWindowSize(int &wid,int &hei);
 void FsPollDevice(void);
-void FsSleep(int ms);
+void FsSleep(double s);
 int FsPassedTime(void);
 void FsGetMouseState(int &lb,int &mb,int &rb,int &mx,int &my);
 int FsGetMouseEvent(int &lb,int &mb,int &rb,int &mx,int &my);

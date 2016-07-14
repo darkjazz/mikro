@@ -1,0 +1,90 @@
+{\rtf1\mac\ansicpg10000\cocoartf102
+{\fonttbl\f0\fnil\fcharset106 Inconsolata;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red0\green0\blue191;\red96\green96\blue96;
+\red0\green115\blue0;\red191\green0\blue0;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural
+
+\f0\fs24 \cf2 (\
+\cf3 var\cf2  layers;\
+layers = [\
+	\cf3 MultiChannelLayer\cf2 (\cf4 "hi"\cf2 , \
+		\cf3 MultiChannelCheck\cf2 .standardSetups[\cf5 \\octagon\cf2 ],\
+		(\{0.4pi\} ! 8) * pi, (0..7)\
+	),\
+	\cf3 MultiChannelLayer\cf2 (\cf4 "low"\cf2 , \
+		\cf3 MultiChannelCheck\cf2 .standardSetups[\cf5 \\octagon\cf2 ],\
+		(\{-0.4pi\} ! 8) * pi, (8..15)	\
+	)\
+];\
+\
+\cf3 MultiChannelCheck\cf2 (layers)\
+)\
+\
+\
+(\
+s = \cf3 Server\cf2 .internal;\
+\cf3 Server\cf2 .default = s;\
+\
+s.options.numOutputBusChannels = 16;\
+s.options.numWireBufs = 256;\
+\
+if (s.serverRunning.not) \{ s.boot \};\
+)\
+\
+\
+(\
+\
+\cf3 SynthDef\cf2 (\cf5 \\ambitest\cf2 , \{\cf3 |bfout, dur|\cf2 \
+	\cf3 var\cf2  hi, lo, sig, env, azm, elv, rho, ef, freqs;\
+	env = \cf3 EnvControl\cf2 .kr(\cf5 \\env\cf2 );\
+	azm = \cf3 EnvGen\cf2 .kr(\cf3 EnvControl\cf2 .kr(\cf5 \\azm\cf2 ), timeScale: dur);\
+	elv = \cf3 EnvGen\cf2 .kr(\cf3 EnvControl\cf2 .kr(\cf5 \\elv\cf2 ), timeScale: dur);\
+	rho = \cf3 EnvGen\cf2 .kr(\cf3 EnvControl\cf2 .kr(\cf5 \\rho\cf2 ), timeScale: dur);\
+	ef = \cf3 EnvGen\cf2 .kr(\cf3 Env\cf2 .perc, \cf3 Impulse\cf2 .kr(16), timeScale: 1/16, levelScale: 0.5);\
+	freqs = \cf3 Array\cf2 .geom(4, 40, 512**(1/4));\
+	hi = \cf3 Mix\cf2 (\cf3 VarSaw\cf2 .ar(freqs, mul:\cf3 AmpCompA\cf2 .kr(freqs)))\
+		* ef;\
+	lo = \cf3 Mix\cf2 (\cf3 SinOsc\cf2 .ar(\cf3 Array\cf2 .geom(6, 20, 2**(1/17)) * (1..6), pi, 0.2)) * ef; \
+	sig = (hi + lo) * \cf3 EnvGen\cf2 .kr(env, timeScale: dur, doneAction: 2);\
+	\cf3 Out\cf2 .ar(bfout, \cf3 BFEncode1\cf2 .ar(sig, azm, elv, rho))\
+\}).send(s);\
+\
+~bus = \cf3 Bus\cf2 .audio(s, 4);\
+\
+~group = \cf3 Group\cf2 ();\
+\
+\cf3 RSdecoder\cf2 (~bus, ~group);\
+\
+)\
+\
+\
+(\{\
+	\cf3 var\cf2  dur = 4;\
+	\
+	\cf6 // transverse plane\cf2 \
+	\cf3 Synth\cf2 .head(~group, \cf5 \\ambitest\cf2 , [\cf5 \\bfout\cf2 , ~bus.index, \cf5 \\dur\cf2 , dur])\
+		.setn(\cf5 \\env\cf2 , \cf3 Env\cf2 ([0.001, 1.0, 1.0, 0.001], [0.0, 1.0, 0.0]).asArray)\
+		.setn(\cf5 \\azm\cf2 , \cf3 Env\cf2 ((0,0.25..2) * pi, (1/8 ! 8)).asArray)\
+		.setn(\cf5 \\elv\cf2 , \cf3 Env\cf2 ([-0.25, -0.25] * pi, [1]).asArray)\
+		.setn(\cf5 \\rho\cf2 , \cf3 Env\cf2 ([1.5, 1.5], [1]).asArray);\
+		\
+	(dur + 1).wait;\
+	\
+	\cf6 //coronal plane\cf2 \
+	\cf3 Synth\cf2 .head(~group, \cf5 \\ambitest\cf2 , [\cf5 \\bfout\cf2 , ~bus.index, \cf5 \\dur\cf2 , dur])\
+		.setn(\cf5 \\env\cf2 , \cf3 Env\cf2 ([0.001, 1.0, 1.0, 0.001], [0.0, 1.0, 0.0]).asArray)\
+		.setn(\cf5 \\azm\cf2 , \cf3 Env\cf2 ([0.5pi, 0.0, -0.5pi, 0.0, 0.5pi], (1/4 ! 4)).asArray)\
+		.setn(\cf5 \\elv\cf2 , \cf3 Env\cf2 ([0, 0.5pi, 0, -0.5pi, 0], (1/4 ! 4)).asArray)\
+		.setn(\cf5 \\rho\cf2 , \cf3 Env\cf2 ([1.5, 1.5], [1]).asArray);\
+\
+	(dur + 1).wait;\
+\
+	\cf6 // sagittal plane\cf2 \
+	\cf3 Synth\cf2 .head(~group, \cf5 \\ambitest\cf2 , [\cf5 \\bfout\cf2 , ~bus.index, \cf5 \\dur\cf2 , dur])\
+		.setn(\cf5 \\env\cf2 , \cf3 Env\cf2 ([0.001, 1.0, 1.0, 0.001], [0.0, 1.0, 0.0]).asArray)\
+		.setn(\cf5 \\azm\cf2 , \cf3 Env\cf2 ([0, 0.125, 0, -0.125] * pi, (1/3!3)).asArray)\
+		.setn(\cf5 \\elv\cf2 , \cf3 Env\cf2 ([0, 0.5pi, 0, -0.5pi, 0], (1/4 ! 4)).asArray)\
+		.setn(\cf5 \\rho\cf2 , \cf3 Env\cf2 ([1.5, 0, 1.5, 0, 1.5], (1/4 ! 4)).asArray);\
+	\
+\}.fork\
+)}

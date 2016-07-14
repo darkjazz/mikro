@@ -49,6 +49,8 @@ public:
 		fragSizeY = (double)(winHeight / world->sizeY()) * 0.1;//0.04;
 		vectorSize = world->vectorSize();
 		currentIndex = world->index();		
+		maxphase = 30;
+		phase = 1;
 	};
 	
 	~GraphicsRenderer() {
@@ -80,7 +82,7 @@ private:
 	
 	double fragSizeX, fragSizeY, state;
 	float xL, yB, zF, xW, yH, zD, red, green, blue, alpha;
-	int currentIndex, vectorSize;
+	int currentIndex, vectorSize, phase, maxphase;
 	Node* currentNode;
 	Node* ptrBMU;
 	World* world;

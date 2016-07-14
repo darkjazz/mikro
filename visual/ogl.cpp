@@ -67,6 +67,12 @@ void GraphicsRenderer::prepareFrame() {
 		rowColors = new GLfloat[world->sizeY()*4];
 	}
 	
+	phase++;
+	
+	if (phase >= maxphase) {
+		phase = 1;
+	}
+	
 //	if (patternLib[13].active)
 //	{
 //		_drawWorld = true;
@@ -188,13 +194,13 @@ void GraphicsRenderer::pattern00(int x, int y) {
 	alpha *= patternLib[0].alpha;
 	
 	strokeRect(0, 1.0);
-//	strokeRectArray();
 		
 }
 
 void GraphicsRenderer::pattern01(int x, int y) {
 	int i;
 	double avg;
+	double radius, dist;
 	
 	xL = fragSizeX * x;
 	yB = fragSizeY * y;
@@ -209,7 +215,35 @@ void GraphicsRenderer::pattern01(int x, int y) {
 	red = green = blue = avg; 
 	alpha = avg * state;
 	alpha *= patternLib[1].alpha;
-	drawLine(xL, yB + (fragSizeY * 0.5), zF, xL + fragSizeX, yB + (fragSizeY * 0.5), zF, 1.0);
+	drawLine(xL, yB + (fragSizeY * 0.5), zF, xL + fragSizeX, yB + (fragSizeY * 0.5), zF, 50.0);
+		
+	radius = 6.0;
+	
+	if (ptrBMU)
+	{
+		dist = pow(ptrBMU->x - currentNode->x, 2) + pow(ptrBMU->y - currentNode->y, 2);		
+		
+		if (dist < pow(radius, 2)) {
+			
+			zF = zD = -100 + dist;
+			
+			red = state;
+			green = state;
+			blue = state;
+			
+			xL = x * fragSizeX + fragSizeX - (fragSizeX * state);
+			yB = y * fragSizeY + (fragSizeY * 0.5);
+			xW = fragSizeX * state * 2.0;
+			yH = yB;
+			
+			alpha = map(exp(dist / (pow(radius, 2) * -2.0)), 0.2, 1.0);
+			alpha *= patternLib[1].alpha;
+			
+			drawLine(xL, yB, zF, xL + xW, yB, zF, 5.0);			
+			
+		}		
+	}
+	
 	
 //	if (ptrBMU) {
 //		if (ptrBMU->x == x && ptrBMU->y == y) {
@@ -232,7 +266,7 @@ void GraphicsRenderer::pattern02(int x, int y) {
 	if (x > 0 && y > 0 && x < world->sizeX() - 1 && y < world->sizeY() - 1)
 	{
 	
-		mul = 2;
+		mul = 4;
 				
 		xL = fragSizeX * 1.1 * x + (fragSizeX * cos(state * 2 * pi)) - (fragSizeX * mul * cos(state * 2 * pi));
 		yB = fragSizeY * 1.1 * y + (fragSizeY * sin(state * 2 * pi)) - (fragSizeY * mul * sin(state * 2 * pi));
@@ -245,7 +279,7 @@ void GraphicsRenderer::pattern02(int x, int y) {
 		red = currentNode->weights[0] * state;
 		green = currentNode->weights[1] * state;
 		blue = currentNode->weights[2] * state;
-		alpha = currentNode->weights[3] * state;
+		alpha = map(state, 0.2, 1.0);
 		alpha *= patternLib[2].alpha;
 		
 		drawLine(xL, yB, zF, xW, yH, zD, (state + eState) / 2.0);
@@ -257,7 +291,7 @@ void GraphicsRenderer::pattern02(int x, int y) {
 		red = currentNode->weights[4] * state;
 		green = currentNode->weights[5] * state;
 		blue = currentNode->weights[6] * state;
-		alpha = currentNode->weights[7] * state;
+		alpha = map(state, 0.2, 1.0);
 		alpha *= patternLib[2].alpha;
 		
 		drawLine(xL, yB, zF, xW, yH, zD, (state + eState) / 2.0);
@@ -269,7 +303,7 @@ void GraphicsRenderer::pattern02(int x, int y) {
 		red = currentNode->weights[8] * state;
 		green = currentNode->weights[9] * state;
 		blue = currentNode->weights[10] * state;
-		alpha = currentNode->weights[11] * state;
+		alpha = map(state, 0.2, 1.0);
 		alpha *= patternLib[2].alpha;
 		
 		drawLine(xL, yB, zF, xW, yH, zD, (state + eState) / 2.0);
@@ -282,7 +316,7 @@ void GraphicsRenderer::pattern02(int x, int y) {
 		red = currentNode->weights[0] * state;
 		green = currentNode->weights[2] * state;
 		blue = currentNode->weights[4] * state;
-		alpha = currentNode->weights[6] * state;
+		alpha = map(state, 0.2, 1.0);
 		alpha *= patternLib[2].alpha;
 		
 		drawLine(xL, yB, zF, xW, yH, zD, (state + eState) / 2.0);
@@ -360,8 +394,8 @@ void GraphicsRenderer::pattern04(int x, int y) {
 //	int i;
 	float xx, yy;
 	
-	xx = fragSizeX * cos((state + (x + 1 / 40)) * (2 * pi));
-	yy = fragSizeY * sin((state + (y + 1 / 40)) * (2 * pi));
+	xx = fragSizeX * cos(state * (2 * pi));
+	yy = fragSizeY * sin(state * (2 * pi));
 	
 	xW = state * fragSizeX * 0.25f;
 	yH = state * fragSizeY * 0.25f;
@@ -369,13 +403,13 @@ void GraphicsRenderer::pattern04(int x, int y) {
 	xL = x * fragSizeX + xx + xW;
 	yB = y * fragSizeY + yy + yH;
 	
-	red = currentNode->weights[7] * state;
-	green = currentNode->weights[6] * state;
-	blue = currentNode->weights[5] * state;
+	red = clipf(currentNode->weights[7], 0.3, 1.0) * state;
+	green = clipf(currentNode->weights[6], 0.3, 1.0) * state;
+	blue = clipf(currentNode->weights[5], 0.3, 1.0) * state;
 	alpha = map(state, 0.5, 1.0);
 	alpha *= patternLib[4].alpha;
 	
-	drawPoint(xL, yB, -100.0, state * 2.0f);
+	drawPoint(xL, yB, -100.0, map(state, 1.0f, 4.0f));
 	
 }
 
@@ -388,11 +422,11 @@ void GraphicsRenderer::pattern05(int x, int y) {
 	if (ptrBMU)
 	{
 		
-		zF = zD = -100;
+		zF = -100;
 				
-		red = currentNode->weights[0] * (1.0 - state);
-		green = currentNode->weights[1] * (1.0 - state);
-		blue = currentNode->weights[2] * (1.0 - state);
+		red = clipf(currentNode->weights[0] * fabsf(0.5 - state) * 2.0, 0.0, 1.0);
+		green = clipf(currentNode->weights[1] * fabsf(0.5 - state) * 2.0, 0.0, 1.0);
+		blue = clipf(currentNode->weights[2] * fabsf(0.5 - state) * 2.0, 0.0, 1.0);
 		
 		dist = pow(ptrBMU->x - currentNode->x, 2) + pow(ptrBMU->y - currentNode->y, 2);		
 		
@@ -401,6 +435,8 @@ void GraphicsRenderer::pattern05(int x, int y) {
 			yB = y * fragSizeY + (fragSizeY * 0.5);
 			xW = fragSizeX * state * 2.0;
 			yH = yB;
+			
+			zF += dist;
 									
 			alpha = map(exp(dist / (pow(radius, 2) * -2.0)), 0.2, 1.0);
 			alpha *= patternLib[5].alpha;
@@ -415,7 +451,7 @@ void GraphicsRenderer::pattern05(int x, int y) {
 			yH = fragSizeY * state * 2.0;
 			xW = xL;
 
-			alpha = map(state, 0.0, 1.0);
+			alpha = map(state, 0.3, 1.0);
 			alpha *= patternLib[5].alpha;			
 			drawLine(xL, yB, zF, xL, yB + yH, zF, 1.0);			
 		}
@@ -433,8 +469,8 @@ void GraphicsRenderer::pattern06(int x, int y) {
 	
 	for (i = 0; i < pts; i++) {
 	
-		xx = fragSizeX * cos( (state * currentNode->weights[i] ) * (4 * pi));
-		yy = fragSizeY * sin( (state * currentNode->weights[i] ) * (4 * pi));
+		xx = fragSizeX * 2.0 * cos( (state * currentNode->weights[i] ) * (4 * pi));
+		yy = fragSizeY * 2.0 * sin( (state * currentNode->weights[i] ) * (4 * pi));
 				
 		xL = x * fragSizeX + xx;
 		yB = y * fragSizeY + yy;
@@ -442,10 +478,10 @@ void GraphicsRenderer::pattern06(int x, int y) {
 		red = currentNode->weights[i] * state;
 		green = currentNode->weights[i] * state;
 		blue = currentNode->weights[i] * state;
-		alpha = currentNode->weights[i] * state;
+		alpha = clipf(fabsf(0.5 - state) * 2.0, 0.5, 1.0);
 		alpha *= patternLib[6].alpha;
 		
-		drawPoint(xL, yB, -100.0, 1.0);
+		drawPoint(xL, yB, map(state, -80.0, -100.0), 2.0);
 	}
 			
 }
@@ -475,31 +511,36 @@ void GraphicsRenderer::pattern07(int x, int y) {
 
 void GraphicsRenderer::pattern08(int x, int y) {
 	
-	red = clipf(currentNode->weights[0], 0.0, 1.0);
-	green = clipf(currentNode->weights[1], 0.0, 1.0);
-	blue = clipf(currentNode->weights[2], 0.0, 1.0);
-	alpha = clipf(1.0 - currentNode->weights[3], 0.0, 1.0);
+	float minrad, maxrad, otherstate, loc;
+	
+	red = fabsf(0.5f - state) * 2.0;
+	green = fabsf(0.5f - state) * 2.0;
+	blue = fabsf(0.5f - state) * 2.0;
+	alpha = map(state, 0.4, 1.0);
 	alpha *= patternLib[8].alpha;
 	
-	xL = x * fragSizeX;
-	yB = y * fragSizeY;
-	xW = fragSizeX;
-	yH = fragSizeY * 0.25;
+	minrad = 4.0;
+	maxrad = 20.0;
 	
-	zF = zD = -100.0;
+	loc = ((2 * pi)/world->sizeX() * y) + ((2 * pi * phase)/maxphase);
+		
+	if (x == 0) {
+		otherstate = 1.0;
+	}
+	else {
+		otherstate = currentNode->neighbors[1]->states[currentIndex];
+	}
+			
+	xL = (world->sizeX() * fragSizeX * 0.5) + (map(otherstate,minrad,maxrad) * sin( loc ));
+	yB = (world->sizeY() * fragSizeY * 0.5) + (map(otherstate,minrad,maxrad) * cos( loc ));
 	
-//	drawLine(xL, yB, zF, xL + xW, yB + yH, zD, 1.0);
-
-	strokeRect(0, 1.0);
+	xW = (world->sizeX() * fragSizeX * 0.5) + (map(state,minrad,maxrad) * cos( loc ));
+	yH = (world->sizeY() * fragSizeY * 0.5) + (map(state,minrad,maxrad) * sin( loc ));
 	
-	red = green = blue = clipf(currentNode->weights[5], 0.0, 1.0);
+	zF = -100 - (x * fragSizeX + (fragSizeX * 0.5));
+	zD = fragSizeX;
 	
-	xL = x * fragSizeX;
-	yB = y * fragSizeY + (fragSizeY * 0.5);
-
-//	drawLine(xL, yB, zF, xL + xW, yB + yH, zD, 1.0);
-	
-	strokeRect(0, 1.0);
+	drawLine(xL, yB, zF, xW, yH, zF-zD, map(state, 6.0, 2.0));
 	
 }
 
@@ -513,17 +554,17 @@ void GraphicsRenderer::pattern09(int x, int y) {
 
 	red = green = blue = map(state, 0.1, 0.7);
 	
-	count = map(state, 4, 8);
+	count = map(state, 12, 4);
 	
-	cx = x * fragSizeX + (fragSizeX * 0.8);
-	cy = y * fragSizeY + (fragSizeY * 0.8);
+	cx = x * fragSizeX + fragSizeX - cosf(fragSizeX * 4 * state * 2 * pi);
+	cy = y * fragSizeY + fragSizeY - sinf(fragSizeY * 4 * state * 2 * pi);
 	
 	for (i = 0; i < count; i++)
 	{
 		ex = cx + (fragSizeX * map(state, 0.5, 2.0) * cosf(state * (i / (float)count) * (2.0 * pi)));
 		ey = cy + (fragSizeY * map(state, 0.5, 2.0) * sinf(state * (i / (float)count) * (2.0 * pi)));
 		
-		alpha = state;
+		alpha = 1 - state;
 		alpha *= patternLib[9].alpha;
 		
 		drawLine(cx, cy, -100.0, ex, ey, -100.0, 1.0);
@@ -579,119 +620,114 @@ void GraphicsRenderer::pattern11(int x, int y) {
 
 void GraphicsRenderer::pattern12(int x, int y) {
 
-	int indexv, indexc;
-	float xx, yy;
-
-	xx = fragSizeX * cos((state + (x + 1 / 40)) * (2 * pi));
-	yy = fragSizeY * sin((state + (y + 1 / 40)) * (2 * pi));
+	zF = zD = fragSizeX * sin(state * 2 * pi ) - 100.0;
 	
-	xW = state * fragSizeX * 0.25f;
-	yH = state * fragSizeY * 0.25f;
+	xW = state * fragSizeX * 16.0f;
+	yH = state * fragSizeY * 16.0f;
 	
-	xL = x * fragSizeX + xx + xW;
-	yB = y * fragSizeY + yy + yH;
+	xL = x * fragSizeX + (fragSizeX * 0.5) - (xW * 0.5);
+	yB = y * fragSizeY + (fragSizeY * 0.5) - (yH * 0.5);
 	
-	red = state * currentNode->weights[0];
-	green = state * currentNode->weights[1];
-	blue = state * currentNode->weights[2];
+	red = round(state * clipf(currentNode->weights[0], 0.0, 1.0) * 5) / 5.0 * 0.5;
+	green = round(state * clipf(currentNode->weights[1], 0.0, 1.0) * 5) / 5.0 * 0.5;
+	blue = round(state * clipf(currentNode->weights[1], 0.0, 1.0) * 5) / 5.0 * 0.5;
 	alpha = state;
 	alpha *= patternLib[12].alpha;
-		
-	indexv = y * 3;
-	indexc = y * 4;
 	
-	rowVertices[indexv] = xL;
-	rowVertices[indexv + 1] = yB;
-	rowVertices[indexv + 2] = -100.0 * map(state, 0.8, 1.2);
-	
-	rowNormals[indexv] = 0;
-	rowNormals[indexv + 1] = 0;
-	rowNormals[indexv + 2] = 1;
-	
-	rowColors[indexc] = red;
-	rowColors[indexc + 1] = green;
-	rowColors[indexc + 2] = blue;
-	rowColors[indexc + 3] = alpha;
+	if (isEven((int)(state * 10000.0))) {
+		fillRect(0);
+	}
+	else {
+		strokeRect(0, 1.0);
+	}
+
 	
 }
 
 void GraphicsRenderer::pattern13(int x, int y) {
-	int segs;
+	float lbx, lby;
+	
+	xL = x * fragSizeX + (fragSizeX * 0.5);
+	yB = y * fragSizeY + (fragSizeY * 0.5);
 
-	xL = x * fragSizeX + fragSizeX - (fragSizeX * state);
-	yB = y * fragSizeY + fragSizeY - (fragSizeY * state);
-	zF = zD = -100.0;
 	
-	xW = fragSizeX * state * 2.0;
-	yH = fragSizeY * state * 2.0;
+	xL = x * fragSizeX + (fragSizeX * 0.5) + (fragSizeX * 2.0 * sin(state*-2*pi));
+	yB = y * fragSizeY + (fragSizeY * 0.5) + (fragSizeY * 2.0 * cos(state*-2*pi));
 	
-	red = clipf(currentNode->weights[0], 0.0, 1.0) * state;
-	green = clipf(currentNode->weights[1], 0.0, 1.0) * state;
-	blue = clipf(currentNode->weights[2], 0.0, 1.0) * state;
-	alpha = state;
+	red = clipf(currentNode->weights[3], state*0.8, state*1.2) * map(state, 0.3, 0.7);
+	green = clipf(currentNode->weights[4], state*0.8, state*1.2) * map(state, 0.3, 0.7);
+	blue = clipf(currentNode->weights[4], state*0.8, state*1.2) * map(state, 0.3, 0.7);
+	alpha = map(state, 0.5, 1.0);
 	alpha *= patternLib[13].alpha;
+		
+	lbx = xL;
+	lby = yB;
 	
-	segs = map(state, 4, 32);
+	xL = x * fragSizeX + (fragSizeX * 0.5) + (fragSizeX * 6.0 * cos(state*2*pi));
+	yB = y * fragSizeY + (fragSizeY * 0.5) + (fragSizeY * 6.0 * sin(state*2*pi));
+	zF = zD = -100.0;
+		
+	alpha = map(alpha, 0.1, 0.5);
 	
-	drawCircle(0, xW, (int)segs, false);
+	drawLine(lbx, lby, zF, xL, yB, zD, 1.0);
 		
 }
 
 void GraphicsRenderer::pattern14(int x, int y) {
-	int segs, i;
-	float avg;
 	
-	xL = x * fragSizeX + fragSizeX - (fragSizeX * 0.5 * state);
-	yB = y * fragSizeY + fragSizeY - (fragSizeY * 0.5 * state);
-	zF = zD = -100.0;
+	float minrad, maxrad;
 	
-	avg = 0.0;
-	for (i = 0; i < vectorSize; i++)
-	{
-		avg += currentNode->weights[i];
-	}
+	minrad = 2.0;
+	maxrad = 10.0;
+		
+	xL = x * fragSizeX + (fragSizeX * 0.5);
 	
-	avg = avg / vectorSize;
+	yB = (world->sizeY() * fragSizeY * 0.5) + (map(state,minrad,maxrad)  * sin( (2 * pi)/world->sizeY()*y ));
+	zF = -100.0 + (map(state,minrad,maxrad) * cos( (2 * pi)/world->sizeY()*y ));
 	
-	xW = fragSizeX * state * avg;
-	yH = fragSizeY * state;
+	xW = fragSizeX;
 	
-	red = clipf(currentNode->weights[7], 0.0, 1.0) * state;
-	green = clipf(currentNode->weights[6], 0.0, 1.0) * state;
-	blue = clipf(currentNode->weights[5], 0.0, 1.0) * state;
-	alpha = state;
+	red = state;
+	green = state;
+	blue = state;
+	alpha = map(state, 0.4, 1.0);
 	alpha *= patternLib[14].alpha;
 	
-	segs = 12;
-	
-	drawCircle(0, xW, (int)segs, true);
-	drawCircle(0, xW, (int)segs, false);
+	drawLine(xL, yB, zF, xL+xW, yB, zF, 1.0);
+
 	
 }
 
 void GraphicsRenderer::pattern15(int x, int y) {
+	double dev;
+	
 	int resize;
 	resize = 8;
-	xL = x * fragSizeX - (fragSizeX * state * resize * 0.5);
+	
+	dev = 0.0;
+	
+	for(int i=0; i < 8; i++) {
+		dev += currentNode->neighbors[i]->states[currentIndex];
+	}
+	
+	dev /= 8;
+	
+	dev = pow(state - dev, 2.0) + 0.25;
+	
+	xL = x * fragSizeX - (fragSizeX * dev * resize * 0.5);
 	yB = y * fragSizeY;
 	zF = zD = -100.0;
 	
-	xW = fragSizeX * state * resize;
-	yH = fragSizeY * state;
+	xW = fragSizeX * dev * resize;
+	yH = fragSizeY * dev;
 	
 	red = clipf(currentNode->weights[0], 0.0, 1.0) * state;
 	green = clipf(currentNode->weights[1], 0.0, 1.0) * state;
 	blue = clipf(currentNode->weights[2], 0.0, 1.0) * state;
-	alpha = state;
+	alpha = dev;
 	alpha *= patternLib[15].alpha;
 	
-	if (state > 0.75) {
-		drawLine(xL, yB + (fragSizeY * 0.5), zF, xL + xW, yB + (fragSizeY * 0.5), zD, state * 5.0);
-	}
-	else
-	{
-		drawLine(xL + (fragSizeX * 0.5), yB, zF, xL + (fragSizeX * 0.5), yB + yH, zD, state * 3.0);	
-	}
+	drawLine(xL, yB + (fragSizeY * 0.5), zF, xL + xW, yB + (fragSizeY * 0.5), zD, dev * 5.0);
 }
 
 void GraphicsRenderer::strokeRectArray() {

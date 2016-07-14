@@ -1,14 +1,14 @@
 (
-~decoder = Decoder(
+~decoder = FoaDecoder(
 	isLocal: true, 
-	isUHJ: true
+	decoderType: 'stereo'
 );
 
 //// LIVE INPUT
 //~input = MikroInput(~decoder);
 
 //// SATOSHI SAMPLES
-~input = MikroInput(~decoder, "/Users/alo/sounds/eclambone_samples/*");
+~input = MikroFoaInput(~decoder, "/Users/alo/sounds/eclambone_samples/*");
 
 //// CHRISTIAN
 //~input = MikroInput(~decoder, "/Users/alo/sounds/christian/monoclipmx.aif");
@@ -46,17 +46,27 @@
 	analyzer: ~analyzer
 );
 
+~recognizer = PatchRecognizer(~mikro).load("/Users/alo/Data/mikro/110802_112556.plib");
+
+~recognizer.addResponderFunction(\resp, {|rec|	
+	Post << "Current patch: " << ~input.currentPatch << "  Current guess: " << rec.currentGuess << "  Most common: " << rec.mostCommon << Char.nl;
+});
+
 ~procs = "/Users/alo/Development/mikro/audio/procs.scd".load;
 
 ~composer = MikroComposer(~mikro, ~procs);
 
 ~eq = MasterEQ(4);
 
-~recognizer = PatchRecognizer(~mikro).load("/Users/alo/Data/mikro/110802_112556.plib");
-
 ~mikro.makeGui(~composer, ~recognizer);
 
 )
+
+~recognizer.run
+
+~recognizer.removeResponderFunction(\resp)
+
+~recognizer.stop
 
 ~mikro.graphics.start(1)
 
